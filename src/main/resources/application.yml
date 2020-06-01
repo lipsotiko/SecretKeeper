@@ -1,0 +1,17 @@
+---
+spring:
+  profile: production
+heroku:
+  access-token: ${HEROKU_ACCESS_TOKEN}
+  webhook:
+    secret: ${HEROKU_WEBHOOK_SECRET}
+    events-url: https://api.heroku.com/apps/vangos-secret-keeper/webhook-events
+
+---
+spring:
+  profile: development
+heroku:
+  access-token: not+applicable
+  webhook:
+    secret: not+applicable
+    events-url: https://api.heroku.com/apps/vangos-secret-keeper/webhook-events
