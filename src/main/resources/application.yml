@@ -6,7 +6,9 @@ heroku:
   webhook:
     secret: ${HEROKU_WEBHOOK_SECRET}
     events-url: https://api.heroku.com/apps/vangos-secret-keeper/webhook-events
-
+bitly:
+  api-url: https://api-ssl.bitly.com/v4/bitlinks
+  access-token: ${BITLY_ACCESS_TOKEN}
 ---
 spring:
   profile: development
@@ -15,3 +17,6 @@ heroku:
   webhook:
     secret: not+applicable
     events-url: https://api.heroku.com/apps/vangos-secret-keeper/webhook-events
+bitly:
+  api-url: https://api-ssl.bitly.com/v4/bitlinks
+  access-token: not+applicable

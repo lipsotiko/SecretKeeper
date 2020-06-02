@@ -11,15 +11,14 @@
         <button @click="reset">Reset</button>
       </div>
     </div>
-    <div v-if="decryptUrl" class="decrypt-url">
-      <input
-        v-model="decryptUrl"
-        rows="3"
-        cols="100"
-        ref="decrypt-url"
-      />
-      <button @click="copy()">Copy</button>
-    </div>
+    <dialog ref="dialog">
+      <div v-if="!loading && shortDecryptUrl">
+        <input v-model="shortDecryptUrl" ref="decrypt-url" />
+        <button @click="copy">Copy</button>
+        <button @click="reset">Close</button>
+      </div>
+      <span v-if="loading">loading...</span>
+    </dialog>
   </div>
 </template>
 
@@ -32,12 +31,17 @@ export default {
   name: 'Encrypt',
   data: () => ({
     secret: null,
-    decryptUrl: null
+    shortDecryptUrl: null,
+    loading: false
   }),
   methods: {
     async encrypt () {
+      this.$refs.dialog.showModal()
+      this.loading = true
+
       const secrtetKey = btoa(uuidv4())
       var cipherText = CryptoJS.AES.encrypt(this.secret, secrtetKey).toString()
+      this.secret = null
 
       const requestGuid = await axios
         .post('/api/cipher/save', {
@@ -45,8 +49,16 @@ export default {
         })
         .then(response => response.data)
 
-      this.decryptUrl =
+      const longDecryptUrl =
         window.location.href + 'r/' + requestGuid + '/k/' + secrtetKey
+
+      this.shortDecryptUrl = await axios('/api/url/shorten', {
+        params: {
+          longUrl: longDecryptUrl
+        }
+      }).then(response => response.data.link)
+
+      this.loading = false
     },
     copy () {
       this.$refs['decrypt-url'].select()
@@ -54,17 +66,26 @@ export default {
     },
     reset () {
       this.secret = null
-      this.decryptUrl = null
+      this.shortDecryptUrl = null
+      this.$refs.dialog.close()
     }
   }
 }
 </script>
-<style scoped>
-.decrypt-url {
-  margin-top: 12px;
+<style>
+input {
+  width: 142px;
+  margin-right: 12px;
 }
 
-.decrypt-url input {
-  width: 768px;
+dialog {
+  top: 40vh;
+  border-radius: 5px;
+  border: 1px solid black;
+  text-align: center;
+}
+
+dialog + .backdrop {
+  background-color: rgba(0, 0, 0, 0.4);
 }
 </style>

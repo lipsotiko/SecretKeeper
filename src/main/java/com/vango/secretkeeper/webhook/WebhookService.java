@@ -1,6 +1,6 @@
 package com.vango.secretkeeper.webhook;
 
-public interface WebhookService {
+interface WebhookService {
   void save(HerokuWebhookPayload herokuWebhookPayload);
 
   HerokuWebhookPayload read();
