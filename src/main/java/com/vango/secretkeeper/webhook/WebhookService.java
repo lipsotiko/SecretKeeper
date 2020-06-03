@@ -4,4 +4,6 @@ interface WebhookService {
   void save(HerokuWebhookPayload herokuWebhookPayload);
 
   HerokuWebhookPayload read();
+
+  Boolean isValid(String secret);
 }

@@ -1,6 +1,10 @@
 ---
 spring:
-  profile: production
+  profiles: production
+  data:
+    mongodb:
+      uri: ${MONGODB_URI}
+      database: ${MONGODB_DATABASE}
 heroku:
   access-token: ${HEROKU_ACCESS_TOKEN}
   webhook:
@@ -11,12 +15,16 @@ bitly:
   access-token: ${BITLY_ACCESS_TOKEN}
 ---
 spring:
-  profile: development
-heroku:
-  access-token: not+applicable
-  webhook:
-    secret: not+applicable
-    events-url: https://api.heroku.com/apps/vangos-secret-keeper/webhook-events
-bitly:
-  api-url: https://api-ssl.bitly.com/v4/bitlinks
-  access-token: not+applicable
+  profiles: development
+  autoconfigure:
+    exclude: >
+      org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration,
+      org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration,
+      org.springframework.boot.autoconfigure.data.mongo.MongoRepositoriesAutoConfiguration
+---
+spring:
+  profiles: local
+  data:
+    mongodb:
+      uri: ${MONGODB_URI}
+      database: ${MONGODB_DATABASE}

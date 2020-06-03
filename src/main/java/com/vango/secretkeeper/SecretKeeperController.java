@@ -2,8 +2,7 @@ package com.vango.secretkeeper;
 
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Optional;
 
 import static java.util.UUID.randomUUID;
 
@@ -11,25 +10,26 @@ import static java.util.UUID.randomUUID;
 @RequestMapping("/api/cipher")
 public class SecretKeeperController {
 
-  private final Map<String, String> ciphers;
+  private final CipherService cipherService;
 
-  public SecretKeeperController() {
-    ciphers = new HashMap<>();
+  public SecretKeeperController(CipherService cipherService) {
+    this.cipherService = cipherService;
   }
 
   @PostMapping("/save")
   public String save(@RequestBody SaveSecretRequest saveSecretRequest) {
-    String requestGuid = randomUUID().toString();
-    ciphers.put(requestGuid, saveSecretRequest.getCipherText());
-    return requestGuid;
+    String requestId = randomUUID().toString();
+    cipherService.save(new Cipher(requestId, saveSecretRequest.getCipherText()));
+    return requestId;
   }
 
   @GetMapping("/read")
-  public String read(@RequestParam String requestGuid) {
-    String cipherText = ciphers.get(requestGuid);
-    if (cipherText != null) {
-      ciphers.remove(requestGuid);
-      return cipherText;
+  public String read(@RequestParam String requestId) {
+    Optional<Cipher> optionalCipher = cipherService.get(requestId);
+    if (optionalCipher.isPresent()) {
+      Cipher cipher = optionalCipher.get();
+      cipherService.delete(cipher);
+      return cipher.getCipherText();
     } else {
       return null;
     }

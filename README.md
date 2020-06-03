@@ -14,4 +14,12 @@ This application provides a secure way to share secrets over the internet. It ma
 - Frontend: `cd client && npm install && npm run serve`
 - Build: `./build.sh`
 
+### Environment Variables
+
+- MONGODB_URI: MongoDB database uri (ex: "mongodb+srv://organization:password@db.mongodb.net/test?retryWrites=true&w=majority")
+- MONGODB_DATABASE: MongoDB database name
+- HEROKU_ACCESS_TOKEN: Bearer token for querying webhook events in Heroku
+- HEROKU_WEBHOOK_SECRET: Webhook secret for validating payloads from Heroku
+- BITLY_ACCESS_TOKEN: Bearer token for bit.ly API
+
 [Current Deployment](https://vangos-secret-keeper.herokuapp.com)

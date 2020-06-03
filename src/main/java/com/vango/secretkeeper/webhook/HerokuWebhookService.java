@@ -20,6 +20,9 @@ import java.util.Objects;
 @Profile("production")
 public class HerokuWebhookService implements WebhookService {
 
+  @Value("${heroku.webhook.secret}")
+  private String webhookSecret;
+
   @Value("${heroku.webhook.events-url}")
   private String webhookEventsUrl;
 
@@ -43,5 +46,10 @@ public class HerokuWebhookService implements WebhookService {
       });
     Comparator<HerokuWebhookEvent> cmp = Comparator.comparing(HerokuWebhookEvent::getCreatedAt);
     return Objects.requireNonNull(exchange.getBody()).stream().max(cmp).orElseThrow().getPayload();
+  }
+
+  @Override
+  public Boolean isValid(String secret) {
+    return secret.equals(webhookSecret);
   }
 }

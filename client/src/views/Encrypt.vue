@@ -12,12 +12,12 @@
       </div>
     </div>
     <dialog ref="dialog">
-      <div v-if="!loading && shortDecryptUrl">
+      <div v-if="!creating && shortDecryptUrl">
         <input v-model="shortDecryptUrl" ref="decrypt-url" />
         <button @click="copy">Copy</button>
         <button @click="reset">Close</button>
       </div>
-      <span v-if="loading">loading...</span>
+      <span v-if="creating">creating...</span>
     </dialog>
   </div>
 </template>
@@ -32,12 +32,12 @@ export default {
   data: () => ({
     secret: null,
     shortDecryptUrl: null,
-    loading: false
+    creating: false
   }),
   methods: {
     async encrypt () {
       this.$refs.dialog.showModal()
-      this.loading = true
+      this.creating = true
 
       const secrtetKey = btoa(uuidv4())
       var cipherText = CryptoJS.AES.encrypt(this.secret, secrtetKey).toString()
@@ -58,14 +58,13 @@ export default {
         }
       }).then(response => response.data.link)
 
-      this.loading = false
+      this.creating = false
     },
     copy () {
       this.$refs['decrypt-url'].select()
       document.execCommand('copy')
     },
     reset () {
-      this.secret = null
       this.shortDecryptUrl = null
       this.$refs.dialog.close()
     }

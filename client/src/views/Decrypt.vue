@@ -17,20 +17,21 @@ export default {
     secret: null
   }),
   async created () {
-    const requestGuid = this.$route.params.guid
-    const secretKey = this.$route.params.key
+    const requestId = this.$route.params.requestId
+    const secretKey = this.$route.params.secretKey
 
-    if (requestGuid && secretKey) {
+    if (requestId && secretKey) {
       const cipherText = await axios
         .get('/api/cipher/read', {
           params: {
-            requestGuid
+            requestId
           }
         })
         .then(response => response.data)
 
       if (cipherText) {
         var bytes = CryptoJS.AES.decrypt(cipherText, secretKey)
+        console.log(bytes)
         this.secret = bytes.toString(CryptoJS.enc.Utf8)
       } else {
         this.secret = 'The requested secret is no longer available.'
