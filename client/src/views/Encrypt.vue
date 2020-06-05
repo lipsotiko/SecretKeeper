@@ -1,19 +1,23 @@
 <template>
-  <div>
+  <div class="container">
     <div>
+      <div class="toolbar">
+        <input type="file" ref="secret-file" @change="fileSelected" />
+        <div>
+          <button @click="createShareableLink">Create Shareable Link</button>
+          <button @click="reset">Reset</button>
+        </div>
+      </div>
       <textarea
         v-model="secret"
-        cols="100"
-        placeholder="Input a secret you would like to share..."
+        placeholder="What's your secret...?"
+        v-if="!fileName"
       />
-      <div>
-        <button @click="encrypt">Create Shareable Link</button>
-        <button @click="reset">Reset</button>
-      </div>
+      <div></div>
     </div>
     <dialog ref="dialog">
-      <div v-if="!creating && shortDecryptUrl">
-        <input v-model="shortDecryptUrl" ref="decrypt-url" />
+      <div v-if="!creating && shortUrl">
+        <input v-model="shortUrl" ref="decrypt-url" />
         <button @click="copy">Copy</button>
         <button @click="reset">Close</button>
       </div>
@@ -31,54 +35,90 @@ export default {
   name: 'Encrypt',
   data: () => ({
     secret: null,
-    shortDecryptUrl: null,
-    creating: false
+    shortUrl: null,
+    creating: false,
+    fileName: null
   }),
   methods: {
-    async encrypt () {
-      this.$refs.dialog.showModal()
-      this.creating = true
-
-      const secrtetKey = btoa(uuidv4())
-      var cipherText = CryptoJS.AES.encrypt(this.secret, secrtetKey).toString()
-      this.secret = null
-
-      const requestGuid = await axios
-        .post('/api/cipher/save', {
-          cipherText
-        })
-        .then(response => response.data)
-
-      const longDecryptUrl =
-        window.location.href + 'r/' + requestGuid + '/k/' + secrtetKey
-
-      this.shortDecryptUrl = await axios('/api/url/shorten', {
-        params: {
-          longUrl: longDecryptUrl
-        }
-      }).then(response => response.data.link)
-
-      this.creating = false
+    async createShareableLink () {
+      if (this.secret) {
+        this.creating = true
+        this.$refs.dialog.showModal()
+        const { cipher, key } = this.createKeyAndCipher(this.secret)
+        this.secret = null
+        const requestId = await this.saveCipher(cipher)
+        const longUrl = this.buildUrl(requestId, key, this.fileName)
+        this.shortUrl = await this.shortenUrl(longUrl)
+        this.creating = false
+      }
     },
     copy () {
       this.$refs['decrypt-url'].select()
       document.execCommand('copy')
     },
     reset () {
-      this.shortDecryptUrl = null
       this.$refs.dialog.close()
+      this.secret = null
+      this.shortUrl = null
+      this.fileName = null
+      this.$refs['secret-file'].value = null
+    },
+    fileSelected (e) {
+      const blob = e.target.files[0]
+      this.fileName = blob.name
+      const reader = new FileReader()
+      reader.addEventListener(
+        'load',
+        () => {
+          this.secret = reader.result
+        },
+        false
+      )
+      reader.readAsBinaryString(blob)
+    },
+    createKeyAndCipher (secret) {
+      const key = btoa(uuidv4())
+      const cipher = CryptoJS.AES.encrypt(secret, key).toString()
+      return { cipher, key }
+    },
+    async saveCipher (cipher) {
+      return await axios
+        .post('/api/cipher/save', {
+          cipher
+        })
+        .then(response => response.data)
+    },
+    buildUrl (requestId, key, fileName) {
+      let longUrl =
+        window.location.href + 'r/' + requestId + '/k/' + key + '/f/'
+      if (fileName) {
+        longUrl += encodeURIComponent(fileName)
+      } else {
+        longUrl += 'text'
+      }
+      return longUrl
+    },
+    async shortenUrl (longUrl) {
+      return await axios('/api/url/shorten', {
+        params: {
+          longUrl
+        }
+      }).then(response => response.data.link)
     }
   }
 }
 </script>
 <style>
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+}
+
 input {
-  width: 142px;
-  margin-right: 12px;
+  margin: 6px;
 }
 
 dialog {
-  top: 40vh;
   border-radius: 5px;
   border: 1px solid black;
   text-align: center;

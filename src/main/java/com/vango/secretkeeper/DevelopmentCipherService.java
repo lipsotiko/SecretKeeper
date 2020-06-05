@@ -11,7 +11,7 @@ import java.util.Optional;
 @Profile("development")
 public class DevelopmentCipherService implements CipherService {
 
-  private final Map<String, String> cipherRepository;
+  private final Map<String, Cipher> cipherRepository;
 
   public DevelopmentCipherService() {
     this.cipherRepository = new HashMap<>();
@@ -19,7 +19,7 @@ public class DevelopmentCipherService implements CipherService {
 
   @Override
   public void save(Cipher cipher) {
-    cipherRepository.put(cipher.getRequestId(), cipher.getCipherText());
+    cipherRepository.put(cipher.getRequestId(), cipher);
   }
 
   @Override
@@ -29,8 +29,8 @@ public class DevelopmentCipherService implements CipherService {
 
   @Override
   public Optional<Cipher> get(String requestId) {
-    String cipherText = cipherRepository.get(requestId);
-    return Optional.of(new Cipher(requestId, cipherText));
+    Cipher cipher = cipherRepository.get(requestId);
+    return Optional.of(cipher);
   }
 
 }

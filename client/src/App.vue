@@ -29,9 +29,15 @@
   }
 }
 
+.container {
+  margin: auto;
+  width: 1040px;
+}
+
 textarea {
   outline: none;
   height: 75vh;
+  width: 100%;
 }
 
 button {

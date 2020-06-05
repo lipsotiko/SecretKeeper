@@ -1,6 +1,6 @@
 <template>
-  <div>
-    <textarea v-model="secret" cols="100" />
+  <div class="container">
+    <textarea v-model="secret" />
     <div>
       <button @click="reset">Reset</button>
     </div>
@@ -19,9 +19,10 @@ export default {
   async created () {
     const requestId = this.$route.params.requestId
     const secretKey = this.$route.params.secretKey
+    const fileName = this.$route.params.fileName
 
     if (requestId && secretKey) {
-      const cipherText = await axios
+      const cipher = await axios
         .get('/api/cipher/read', {
           params: {
             requestId
@@ -29,10 +30,24 @@ export default {
         })
         .then(response => response.data)
 
-      if (cipherText) {
-        var bytes = CryptoJS.AES.decrypt(cipherText, secretKey)
-        console.log(bytes)
-        this.secret = bytes.toString(CryptoJS.enc.Utf8)
+      if (cipher) {
+        var bytes = CryptoJS.AES.decrypt(cipher.cipher, secretKey)
+        var str = bytes.toString(CryptoJS.enc.Utf8)
+        if (fileName === 'text') {
+          this.secret = str
+        } else {
+          var ab = new ArrayBuffer(str.length)
+          var ia = new Uint8Array(ab)
+          for (var i = 0; i < str.length; i++) {
+            ia[i] = str.charCodeAt(i)
+          }
+          const linkhref = window.URL.createObjectURL(new Blob([ab]))
+          const link = document.createElement('a')
+          link.href = linkhref
+          link.setAttribute('download', fileName)
+          document.body.appendChild(link)
+          link.click()
+        }
       } else {
         this.secret = 'The requested secret is no longer available.'
       }

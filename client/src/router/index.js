@@ -17,7 +17,7 @@ const routes = [
     name: 'About',
     component: About
   }, {
-    path: '/r/:requestId/k/:secretKey',
+    path: '/r/:requestId/k/:secretKey/f/:fileName',
     name: 'Decrypt',
     component: Decrypt
   }

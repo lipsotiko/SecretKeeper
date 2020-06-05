@@ -4,8 +4,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
 
-import static java.util.UUID.randomUUID;
-
 @RestController
 @RequestMapping("/api/cipher")
 public class SecretKeeperController {
@@ -17,19 +15,19 @@ public class SecretKeeperController {
   }
 
   @PostMapping("/save")
-  public String save(@RequestBody SaveSecretRequest saveSecretRequest) {
-    String requestId = randomUUID().toString();
-    cipherService.save(new Cipher(requestId, saveSecretRequest.getCipherText()));
-    return requestId;
+  public String save(@RequestBody Cipher cipher) {
+    cipher.generateRequestId();
+    cipherService.save(cipher);
+    return cipher.getRequestId();
   }
 
   @GetMapping("/read")
-  public String read(@RequestParam String requestId) {
+  public Cipher read(@RequestParam String requestId) {
     Optional<Cipher> optionalCipher = cipherService.get(requestId);
     if (optionalCipher.isPresent()) {
       Cipher cipher = optionalCipher.get();
       cipherService.delete(cipher);
-      return cipher.getCipherText();
+      return cipher;
     } else {
       return null;
     }

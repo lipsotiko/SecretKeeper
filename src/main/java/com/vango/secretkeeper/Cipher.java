@@ -5,11 +5,17 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 
+import static java.util.UUID.randomUUID;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class Cipher {
   @Id
-  String requestId;
-  String cipherText;
+  private String requestId;
+  private String cipher;
+
+  public void generateRequestId() {
+    this.requestId = randomUUID().toString();
+  }
 }
